@@ -235,114 +235,122 @@ function InterestCalculator() {
 
           {/* Buttons */}
           <div className="d-flex gap-2 mb-3">
-            <button className="btn btn-primary w-100" onClick={calculateFinalAmount}>
-              Calculate
+            <button className="btn btn-primary w-100" style={{ borderRadius: "0px" }} onClick={calculateFinalAmount}>
+              calculate
             </button>
-            <button className="btn btn-danger w-100" onClick={resetHistory}>
-              🔁 Reset All
+            <button className="btn btn-danger w-100" style={{ borderRadius: "0px" }} onClick={resetHistory}>
+              🔁 reset all
             </button>
           </div>
 
           {/* Final Amount */}
           {finalAmount !== null && (
-            <div className="alert mt-4">
-              <h5 className="fw-bold">closing balance ({lastCalculatedYear})</h5>
-
-              <p><strong>Total with Interest {finalAmount} BDT</strong></p>
+            <div className="mt-4 rounded" >
+              <table className="table table-bordered">
+                <tbody className="table-secondary">
+                  <tr>
+                    <td>closing balance ({lastCalculatedYear})</td>
+                    <td>{finalAmount} BDT</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
+
         </div>
       </div>
 
       {/* History Table */}
-      {history.length > 0 && (
-        <div className="mt-5">
-          <h4 className="mb-3 text-center">📊 Yearly Calculation History</h4>
-          <table className="table table-bordered text-center">
-            <thead className="table-secondary">
-              <tr>
-                <th>Year</th>
-                <th>Previous Balance (Tk)</th>
-                <th>Monthly Subscription (Tk)</th>
-                <th>Total (Tk)</th>
-                <th>🗑️</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((entry, index) => (
-                <React.Fragment key={index}>
-                  <tr
-                    style={{ cursor: "pointer" }}
-                    onClick={() => toggleRow(index)}
-                  >
-                    <td>{entry.year}</td>
-                    <td>{entry.prevBalance.toLocaleString()}</td>
-                    <td>{entry.monthlySubs.toLocaleString()}</td>
-                    <td>{entry.total.toLocaleString()}</td>
-                    <td>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteEntry(index);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                  {expandedRows[index] && (
-                    <tr>
-                      <td colSpan="5" className="text-start bg-light">
-                        <strong>Breakdown:</strong>
-                        <div className="table-responsive mt-2">
-                          <table className="table table-sm table-bordered text-center">
-                            <thead className="table-light">
-                              <tr>
-                                <th>Type</th>
-                                <th>Principal (Tk)</th>
-                                <th>Interest (Tk)</th>
-                                <th>Interest %</th>
-                                <th>Total (Tk)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {Object.entries(entry.breakdown.slabs).map(([key, slab], idx) => (
-                                <tr key={key}>
-                                  <td>Slab {idx + 1}</td>
-                                  <td>{slab.principal.toLocaleString()}</td>
-                                  <td>{slab.interest.toLocaleString()}</td>
-                                  <td>{slab.rate}%</td>
-                                  <td>{slab.total.toLocaleString()}</td>
-                                </tr>
-                              ))}
-                              <tr>
-                                <td>Monthly</td>
-                                <td>{entry.breakdown.monthly.principal.toLocaleString()}</td>
-                                <td>{entry.breakdown.monthly.interest.toLocaleString()}</td>
-                                <td>{entry.breakdown.monthly.rate}%</td>
-                                <td>{entry.breakdown.monthly.total.toLocaleString()}</td>
-                              </tr>
-                              <tr className="table-info fw-bold">
-                                <td colSpan="4">closing balance ({entry.year})</td>
-                                <td>{entry.breakdown.subtotal.toLocaleString()}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+      {
+        history.length > 0 && (
+          <div className="mt-5">
+            <h5 className="mb-4 text-center text-uppercase fw-bold">📊 Yearly Calculation History</h5>
+            <table className="table table-bordered text-center">
+              <thead className="table-secondary">
+                <tr>
+                  <th>Year</th>
+                  <th>Previous Balance (BDT)</th>
+                  <th>Monthly Subscription (BDT)</th>
+                  <th>Cloasing Balance (BDT)</th>
+                  <th>🗑️</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((entry, index) => (
+                  <React.Fragment key={index}>
+                    <tr
+                      style={{ cursor: "pointer" }}
+                      onClick={() => toggleRow(index)}
+                    >
+                      <td>{entry.year}</td>
+                      <td>{entry.prevBalance.toLocaleString()}</td>
+                      <td>{entry.monthlySubs.toLocaleString()}</td>
+                      <td>{entry.total.toLocaleString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteEntry(index);
+                          }}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-muted text-center fst-italic">
-            * Click a year to toggle interest breakdown. Use 🗑️ to delete entry.
-          </p>
-        </div>
-      )}
-    </div>
+                    {expandedRows[index] && (
+                      <tr>
+                        <td colSpan="5" className="text-start bg-light">
+                          <strong>Breakdown:</strong>
+                          <div className="table-responsive mt-2">
+                            <table className="table table-sm table-bordered text-center">
+                              <thead className="table-light">
+                                <tr>
+                                  <th>Type</th>
+                                  <th>Principal (BDT)</th>
+                                  <th>Interest (BDT)</th>
+                                  <th>Interest %</th>
+                                  <th>Total (BDT)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Object.entries(entry.breakdown.slabs).map(([key, slab], idx) => (
+                                  <tr key={key}>
+                                    <td>Slab {idx + 1}</td>
+                                    <td>{slab.principal.toLocaleString()}</td>
+                                    <td>{slab.interest.toLocaleString()}</td>
+                                    <td>{slab.rate}%</td>
+                                    <td>{slab.total.toLocaleString()}</td>
+                                  </tr>
+                                ))}
+                                <tr>
+                                  <td>Monthly</td>
+                                  <td>{entry.breakdown.monthly.principal.toLocaleString()}</td>
+                                  <td>{entry.breakdown.monthly.interest.toLocaleString()}</td>
+                                  <td>{entry.breakdown.monthly.rate}%</td>
+                                  <td>{entry.breakdown.monthly.total.toLocaleString()}</td>
+                                </tr>
+                                <tr className="table-info fw-bold">
+                                  <td colSpan="4">closing balance ({entry.year})</td>
+                                  <td>{entry.breakdown.subtotal.toLocaleString()}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-muted text-center fst-italic">
+              * Click a year to toggle interest breakdown. Use 🗑️ to delete entry.
+            </p>
+          </div>
+        )
+      }
+    </div >
   );
 }
 
