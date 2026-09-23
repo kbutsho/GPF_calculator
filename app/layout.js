@@ -2,43 +2,40 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
-import Link from "next/link";
+import { Hind_Siliguri } from "next/font/google";
 import { ToastContainer } from "react-toastify";
+import { SITE } from "@/lib/site";
+
+const hind = Hind_Siliguri({
+  subsets: ["bengali", "latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-bn",
+});
 
 export const metadata = {
-  title: "PF Calculator — বছর সমাপনী হিসাব",
-  description: "প্রভিডেন্ট ফান্ডের স্ল্যাব-ভিত্তিক বছর সমাপনী প্রফিট ও ক্লোজিং ব্যালেন্স হিসাব",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: `${SITE.name} — সাধারণ ভবিষ্য তহবিলের বছর সমাপনী হিসাব`,
+    template: `%s | ${SITE.name}`,
+  },
+  description: SITE.description,
+  keywords: SITE.keywords,
+  openGraph: {
+    title: SITE.name,
+    description: SITE.description,
+    url: SITE.url,
+    siteName: SITE.name,
+    locale: "bn_BD",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn">
+    <html lang="bn" className={hind.variable}>
       <body>
-        <nav className="navbar navbar-expand-lg app-navbar sticky-top">
-          <div className="container">
-            <Link className="navbar-brand d-flex align-items-center gap-2" href="/">
-              <i className="bi bi-calculator-fill" />
-              <span>PF Calculator</span>
-            </Link>
-            <div className="d-flex gap-2">
-              <Link className="btn btn-sm btn-outline-light" href="/">
-                <i className="bi bi-list-ul me-1" />
-                সব বছর
-              </Link>
-              <Link className="btn btn-sm btn-light" href="/year/new">
-                <i className="bi bi-plus-lg me-1" />
-                নতুন হিসাব
-              </Link>
-            </div>
-          </div>
-        </nav>
-
-        <main className="container py-4">{children}</main>
-
-        <footer className="text-center text-muted small py-4">
-          জুলাই – জুন অর্থবছর • স্ল্যাব ভিত্তিক প্রফিট হিসাব
-        </footer>
-
+        {children}
         <ToastContainer position="top-right" autoClose={2500} newestOnTop theme="colored" />
       </body>
     </html>
