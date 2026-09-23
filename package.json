@@ -1,23 +1,25 @@
 {
-  "name": "frontend",
+  "name": "pf-calculator",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3100",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 3100",
+    "lint": "eslint"
   },
   "dependencies": {
-    "bootstrap": "^5.3.7",
-    "next": "15.4.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-toastify": "^11.0.5"
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "mongoose": "^9.9.4",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-toastify": "^11.1.0",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "eslint": "^9",
-    "eslint-config-next": "15.4.2"
+    "eslint-config-next": "16.3.4"
   }
 }

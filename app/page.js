@@ -1,357 +1,160 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import Link from "next/link";
+import dbConnect from "@/lib/mongodb";
+import PfYear from "@/models/PfYear";
+import { calculateYear, fmt } from "@/lib/calc";
+import { normalizeYear } from "@/lib/payload";
 
-function InterestCalculator() {
-  const [year, setYear] = useState("");
-  const [prevBalance, setPrevBalance] = useState("");
-  const [monthlySubs, setMonthlySubs] = useState("");
-  const [finalAmount, setFinalAmount] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [expandedRows, setExpandedRows] = useState({});
-  const [lastCalculatedYear, setLastCalculatedYear] = useState("");
+export const dynamic = "force-dynamic";
 
+async function loadYears() {
+  try {
+    await dbConnect();
+    const rows = await PfYear.find({}).sort({ startYear: -1, createdAt: -1 }).lean();
+    return { rows, error: null };
+  } catch (e) {
+    return { rows: [], error: e.message };
+  }
+}
 
-  // Interest Rates
-  const [slab1Rate, setSlab1Rate] = useState(13);
-  const [slab2Rate, setSlab2Rate] = useState(12);
-  const [slab3Rate, setSlab3Rate] = useState(11);
-  const [monthlyRate, setMonthlyRate] = useState(8.5);
+export default async function HomePage() {
+  const { rows, error } = await loadYears();
 
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("interestHistory") || "[]");
-    setHistory(data);
-  }, []);
+  const years = rows.map((y) => {
+    const result = calculateYear(normalizeYear(JSON.parse(JSON.stringify(y))));
+    return { ...y, _id: String(y._id), result };
+  });
 
-  const calculateFinalAmount = () => {
-    const prev = parseFloat(prevBalance);
-    const subs = parseFloat(monthlySubs);
-    const yearTrimmed = year.trim();
-
-    if (
-      isNaN(prev) ||
-      isNaN(subs) ||
-      prev < 0 ||
-      subs < 0 ||
-      !yearTrimmed.match(/^\d{4}-\d{4}$/)
-    ) {
-      toast.error("enter valid input")
-      return;
-    }
-    console.log(yearTrimmed)
-    const s1 = slab1Rate / 100;
-    const s2 = slab2Rate / 100;
-    const s3 = slab3Rate / 100;
-    const mRate = monthlyRate / 100;
-
-    const slabBreakdown = {};
-    if (prev <= 1500000) {
-      slabBreakdown.slab1 = {
-        principal: prev,
-        interest: prev * s1,
-        total: prev + prev * s1,
-        rate: slab1Rate,
-      };
-    } else if (prev <= 3000000) {
-      slabBreakdown.slab1 = {
-        principal: 1500000,
-        interest: 1500000 * s1,
-        total: 1500000 + 1500000 * s1,
-        rate: slab1Rate,
-      };
-      const remaining = prev - 1500000;
-      slabBreakdown.slab2 = {
-        principal: remaining,
-        interest: remaining * s2,
-        total: remaining + remaining * s2,
-        rate: slab2Rate,
-      };
-    } else {
-      slabBreakdown.slab1 = {
-        principal: 1500000,
-        interest: 1500000 * s1,
-        total: 1500000 + 1500000 * s1,
-        rate: slab1Rate,
-      };
-      slabBreakdown.slab2 = {
-        principal: 1500000,
-        interest: 1500000 * s2,
-        total: 1500000 + 1500000 * s2,
-        rate: slab2Rate,
-      };
-      const remaining = prev - 3000000;
-      slabBreakdown.slab3 = {
-        principal: remaining,
-        interest: remaining * s3,
-        total: remaining + remaining * s3,
-        rate: slab3Rate,
-      };
-    }
-
-    const monthlyPrincipal = subs;
-    const monthlyInterest = subs * mRate;
-    const monthlyTotal = monthlyPrincipal + monthlyInterest;
-
-    const slabTotal = Object.values(slabBreakdown).reduce(
-      (acc, v) => acc + v.total,
-      0
-    );
-
-    const subtotal = slabTotal + monthlyTotal;
-    const rounded = parseFloat(subtotal.toFixed(2));
-    setFinalAmount(rounded);
-
-    const newEntry = {
-      year: yearTrimmed,
-      prevBalance: prev,
-      monthlySubs: subs,
-      total: rounded,
-      breakdown: {
-        slabs: slabBreakdown,
-        monthly: {
-          principal: monthlyPrincipal,
-          interest: monthlyInterest,
-          total: monthlyTotal,
-          rate: monthlyRate,
-        },
-        subtotal,
-      },
-    };
-
-    const updatedHistory = [...history, newEntry];
-    localStorage.setItem("interestHistory", JSON.stringify(updatedHistory));
-    setHistory(updatedHistory);
-
-    setLastCalculatedYear(yearTrimmed);
-    setYear("");
-    setPrevBalance("");
-    setMonthlySubs("");
-  };
-
-  const resetHistory = () => {
-    localStorage.removeItem("interestHistory");
-    setHistory([]);
-    setFinalAmount(null);
-  };
-
-  const toggleRow = (index) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
-  };
-
-  const deleteEntry = (index) => {
-    const updated = [...history];
-    updated.splice(index, 1);
-    setHistory(updated);
-    localStorage.setItem("interestHistory", JSON.stringify(updated));
-  };
+  const latest = years[0];
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow">
-        <div className="card-body">
-          <h3 className="card-title text-center mb-4 fw-bold text-uppercase">💰 GPF Calculator</h3>
+    <>
+      <div className="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-4">
+        <div>
+          <h4 className="mb-1">সংরক্ষিত বছরসমূহ</h4>
+          <div className="section-hint">
+            প্রতিটি অর্থবছরের ওপেনিং ব্যালেন্স, চাঁদা আর রেট দিয়ে প্রফিট ও ক্লোজিং ব্যালেন্স হিসাব
+          </div>
+        </div>
+        <Link href="/year/new" className="btn btn-brand">
+          <i className="bi bi-plus-lg me-1" />
+          নতুন হিসাব
+        </Link>
+      </div>
 
-          {/* Inputs Row in 1 line */}
-          <div className="row mb-3">
-            <div className="col-md-4">
-              <label className="form-label"><small>Year</small></label>
-              <input
-                required
-                type="text"
-                className="form-control"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                placeholder={`${new Date().getFullYear()}-${new Date().getFullYear() + 1}`}
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label"><small>Previous Balance (BDT)</small></label>
-              <input
-                type="number"
-                className="form-control"
-                value={prevBalance}
-                onChange={(e) => setPrevBalance(e.target.value)}
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label"><small>Monthly Subscription (BDT)</small></label>
-              <input
-                required
-                type="number"
-                className="form-control"
-                value={monthlySubs}
-                onChange={(e) => setMonthlySubs(e.target.value)}
-              />
+      {error && (
+        <div className="alert alert-danger">
+          <i className="bi bi-exclamation-octagon me-2" />
+          ডেটাবেজে যুক্ত হওয়া যায়নি — <code>{error}</code>
+          <div className="small mt-1">
+            <code>.env.local</code> ফাইলে <code>MONGODB_URI</code> ঠিক আছে কিনা দেখুন।
+          </div>
+        </div>
+      )}
+
+      {latest && (
+        <div className="card mb-4 border-success">
+          <div className="card-body">
+            <div className="row g-3 align-items-center">
+              <div className="col-md-4">
+                <div className="text-muted small">সর্বশেষ ক্লোজিং ব্যালেন্স</div>
+                <div className="result-big text-success">{fmt(latest.result.closingBalance)}</div>
+                <div className="section-hint">
+                  জুলাই {latest.startYear} – জুন {latest.startYear + 1}
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="text-muted small">ঐ বছরের প্রফিট</div>
+                <div className="fs-5 fw-semibold num">{fmt(latest.result.profit)}</div>
+                <div className="section-hint">
+                  ব্যালেন্সে {fmt(latest.result.openingInterest)} + জমায়{" "}
+                  {fmt(latest.result.depositInterest)}
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="text-muted small">পরের বছরের সর্বোচ্চ স্ল্যাব রেট</div>
+                <div className="fs-5 fw-semibold">
+                  {calculateYear(
+                    normalizeYear({
+                      ...JSON.parse(JSON.stringify(latest)),
+                      openingBalance: latest.result.closingBalance,
+                    })
+                  ).autoRate}
+                  %
+                </div>
+                <div className="section-hint">নতুন জমা এই রেটে বসবে</div>
+              </div>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Interest Rates */}
-          <div className="row">
-            <div className="col-md-3 mb-3">
-              <label className="form-label"><small>First slab interest rate (%)</small></label>
-              <input
-                required
-                type="number"
-                className="form-control"
-                value={slab1Rate}
-                onChange={(e) => setSlab1Rate(e.target.value)}
-              />
-              <small>(up to 15,00,000 BDT)</small>
-            </div>
-            <div className="col-md-3 mb-3">
-              <label className="form-label"><small>Second slab interest rate (%)</small></label>
-              <input
-                required
-                type="number"
-                className="form-control"
-                value={slab2Rate}
-                onChange={(e) => setSlab2Rate(e.target.value)}
-              />
-              <small>(15,00,001 BDT to 30,00,000 BDT)</small>
-            </div>
-            <div className="col-md-3 mb-3">
-              <label className="form-label"><small>Third slab 3 interest rate (%)</small></label>
-              <input
-                type="number"
-                className="form-control"
-                value={slab3Rate}
-                onChange={(e) => setSlab3Rate(e.target.value)}
-              />
-              <small>(above 30,00,000 BDT)</small>
-            </div>
-            <div className="col-md-3 mb-3">
-              <label className="form-label"><small>Monthly Subscription interest rate (%)</small></label>
-              <input
-                type="number"
-                className="form-control"
-                value={monthlyRate}
-                onChange={(e) => setMonthlyRate(e.target.value)}
-              />
-            </div>
+      {!error && years.length === 0 ? (
+        <div className="card">
+          <div className="card-body text-center py-5">
+            <i className="bi bi-inbox fs-1 text-muted d-block mb-2" />
+            <p className="text-muted mb-3">এখনো কোনো বছর সংরক্ষণ করা হয়নি।</p>
+            <Link href="/year/new" className="btn btn-brand">
+              প্রথম হিসাবটি করুন
+            </Link>
           </div>
-
-          {/* Buttons */}
-          <div className="d-flex gap-2 mb-3">
-            <button className="btn btn-primary w-100" style={{ borderRadius: "0px" }} onClick={calculateFinalAmount}>
-              calculate
-            </button>
-            <button className="btn btn-danger w-100" style={{ borderRadius: "0px" }} onClick={resetHistory}>
-              🔁 reset all
-            </button>
-          </div>
-
-          {/* Final Amount */}
-          {finalAmount !== null && (
-            <div className="mt-4 rounded" >
-              <table className="table table-bordered">
-                <tbody className="table-secondary">
+        </div>
+      ) : (
+        years.length > 0 && (
+          <div className="card">
+            <div className="table-responsive">
+              <table className="table table-hover table-tight align-middle mb-0">
+                <thead>
                   <tr>
-                    <td>closing balance ({lastCalculatedYear})</td>
-                    <td>{finalAmount} BDT</td>
+                    <th>অর্থবছর</th>
+                    <th>গ্রাহক</th>
+                    <th className="num">Opening</th>
+                    <th className="num">Deposits</th>
+                    <th className="num">Profit</th>
+                    <th className="num">Closing</th>
+                    <th className="num">রেট</th>
+                    <th />
                   </tr>
+                </thead>
+                <tbody>
+                  {years.map((y) => {
+                    const matched =
+                      y.reportedProfit !== null &&
+                      y.reportedProfit !== undefined &&
+                      Math.abs(y.result.profit - y.reportedProfit) < 0.005;
+                    return (
+                      <tr key={y._id}>
+                        <td className="text-nowrap fw-semibold">
+                          {y.startYear}–{y.startYear + 1}
+                          {matched && (
+                            <i
+                              className="bi bi-patch-check-fill text-success ms-1"
+                              title="রিপোর্টের সাথে মিলেছে"
+                            />
+                          )}
+                        </td>
+                        <td className="text-nowrap">{y.subscriber || "—"}</td>
+                        <td className="num">{fmt(y.result.openingBalance)}</td>
+                        <td className="num">{fmt(y.result.totalDeposits)}</td>
+                        <td className="num">{fmt(y.result.profit)}</td>
+                        <td className="num fw-semibold">{fmt(y.result.closingBalance)}</td>
+                        <td className="num">
+                          <span className="badge text-bg-light border">{y.result.depositRate}%</span>
+                        </td>
+                        <td className="text-end">
+                          <Link href={`/year/${y._id}`} className="btn btn-sm btn-outline-secondary">
+                            <i className="bi bi-pencil me-1" />
+                            খুলুন
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          )}
-
-        </div>
-      </div>
-
-      {/* History Table */}
-      {
-        history.length > 0 && (
-          <div className="mt-5">
-            <h5 className="mb-4 text-center text-uppercase fw-bold">📊 Yearly Calculation History</h5>
-            <table className="table table-bordered text-center">
-              <thead className="table-secondary">
-                <tr>
-                  <th>Year</th>
-                  <th>Previous Balance (BDT)</th>
-                  <th>Monthly Subscription (BDT)</th>
-                  <th>Cloasing Balance (BDT)</th>
-                  <th>🗑️</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((entry, index) => (
-                  <React.Fragment key={index}>
-                    <tr
-                      style={{ cursor: "pointer" }}
-                      onClick={() => toggleRow(index)}
-                    >
-                      <td>{entry.year}</td>
-                      <td>{entry.prevBalance.toLocaleString()}</td>
-                      <td>{entry.monthlySubs.toLocaleString()}</td>
-                      <td>{entry.total.toLocaleString()}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteEntry(index);
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                    {expandedRows[index] && (
-                      <tr>
-                        <td colSpan="5" className="text-start bg-light">
-                          <strong>Breakdown:</strong>
-                          <div className="table-responsive mt-2">
-                            <table className="table table-sm table-bordered text-center">
-                              <thead className="table-light">
-                                <tr>
-                                  <th>Type</th>
-                                  <th>Principal (BDT)</th>
-                                  <th>Interest (BDT)</th>
-                                  <th>Interest %</th>
-                                  <th>Total (BDT)</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {Object.entries(entry.breakdown.slabs).map(([key, slab], idx) => (
-                                  <tr key={key}>
-                                    <td>Slab {idx + 1}</td>
-                                    <td>{slab.principal.toLocaleString()}</td>
-                                    <td>{slab.interest.toLocaleString()}</td>
-                                    <td>{slab.rate}%</td>
-                                    <td>{slab.total.toLocaleString()}</td>
-                                  </tr>
-                                ))}
-                                <tr>
-                                  <td>Monthly</td>
-                                  <td>{entry.breakdown.monthly.principal.toLocaleString()}</td>
-                                  <td>{entry.breakdown.monthly.interest.toLocaleString()}</td>
-                                  <td>{entry.breakdown.monthly.rate}%</td>
-                                  <td>{entry.breakdown.monthly.total.toLocaleString()}</td>
-                                </tr>
-                                <tr className="table-info fw-bold">
-                                  <td colSpan="4">closing balance ({entry.year})</td>
-                                  <td>{entry.breakdown.subtotal.toLocaleString()}</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-muted text-center fst-italic">
-              * Click a year to toggle interest breakdown. Use 🗑️ to delete entry.
-            </p>
           </div>
         )
-      }
-    </div >
+      )}
+    </>
   );
 }
-
-export default InterestCalculator;
