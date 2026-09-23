@@ -22,6 +22,8 @@ const MonthSchema = new mongoose.Schema(
 
 const PfYearSchema = new mongoose.Schema(
   {
+    // Owner. Every query is scoped by it, so users never see each other's years.
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     subscriber: { type: String, trim: true, default: "" },
     accountNo: { type: String, trim: true, default: "" },
     // Fiscal year is July <startYear> to June <startYear + 1>.
@@ -45,6 +47,6 @@ const PfYearSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-PfYearSchema.index({ startYear: -1 });
+PfYearSchema.index({ userId: 1, startYear: -1 });
 
 export default mongoose.models.PfYear || mongoose.model("PfYear", PfYearSchema, "pf_years");
