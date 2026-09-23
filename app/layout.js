@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import { Hind_Siliguri } from "next/font/google";
 import { ToastContainer } from "react-toastify";
+import { LangProvider } from "@/components/LangProvider";
+import { getLang } from "@/lib/lang";
 import { SITE } from "@/lib/site";
 
 const hind = Hind_Siliguri({
@@ -13,29 +15,57 @@ const hind = Hind_Siliguri({
   variable: "--font-bn",
 });
 
-export const metadata = {
-  metadataBase: new URL(SITE.url),
-  title: {
-    default: `${SITE.name} — সাধারণ ভবিষ্য তহবিলের বছর সমাপনী হিসাব`,
-    template: `%s | ${SITE.name}`,
-  },
-  description: SITE.description,
-  keywords: SITE.keywords,
-  openGraph: {
-    title: SITE.name,
-    description: SITE.description,
-    url: SITE.url,
-    siteName: SITE.name,
-    locale: "bn_BD",
-    type: "website",
-  },
+export async function generateMetadata() {
+  const lang = await getLang();
+  const name = SITE.name[lang];
+  return {
+    metadataBase: new URL(SITE.url),
+    applicationName: name,
+    title: {
+      default: `${name} — ${SITE.tagline[lang]}`,
+      template: `%s | ${name}`,
+    },
+    description: SITE.description[lang],
+    keywords: SITE.keywords[lang],
+    authors: [{ name: SITE.contact.name.en, url: SITE.url }],
+    creator: SITE.contact.name.en,
+    publisher: SITE.contact.name.en,
+    category: "finance",
+    formatDetection: { telephone: false },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    },
+    openGraph: {
+      title: name,
+      description: SITE.description[lang],
+      url: SITE.url,
+      siteName: name,
+      locale: lang === "en" ? "en_US" : "bn_BD",
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title: name, description: SITE.description[lang] },
+    // Paste the tokens from Google Search Console / Bing Webmaster Tools into .env.
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+      other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+        ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+        : undefined,
+    },
+  };
+}
+
+export const viewport = {
+  themeColor: "#0f766e",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const lang = await getLang();
   return (
-    <html lang="bn" className={hind.variable}>
+    <html lang={lang} className={hind.variable}>
       <body>
-        {children}
+        <LangProvider lang={lang}>{children}</LangProvider>
         <ToastContainer position="top-right" autoClose={2500} newestOnTop theme="colored" />
       </body>
     </html>
