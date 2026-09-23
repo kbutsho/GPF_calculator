@@ -1,8 +1,9 @@
-# PF Calculator — বছর সমাপনী হিসাব
+# GPF ক্যালকুলেটর — বছর সমাপনী হিসাব
 
-প্রভিডেন্ট ফান্ডের **জুলাই–জুন অর্থবছরের** প্রফিট ও ক্লোজিং ব্যালেন্স হিসাব করার অ্যাপ।
-ওপেনিং ব্যালেন্স, স্ল্যাব রেট, প্রতি মাসের চাঁদা — সব নিজে ইনপুট দেওয়া যায়, আর প্রতিটি
-বছর MongoDB-তে সংরক্ষিত থাকে।
+সাধারণ ভবিষ্য তহবিলের (GPF) **জুলাই–জুন অর্থবছরের** প্রফিট ও ক্লোজিং ব্যালেন্স হিসাব করার
+অ্যাপ। ব্যবহারকারী মোবাইল নম্বর বা ইমেইল দিয়ে রেজিস্ট্রেশন/লগইন করেন; প্রতিটি হিসাব শুধু তাঁর
+নিজের ড্যাশবোর্ডে (`/dashboard`) থাকে। পাবলিক পেজগুলো (হোম, সুবিধা, কীভাবে কাজ করে, GPF
+নির্দেশিকা, মুনাফার হার, প্রশ্নোত্তর, যোগাযোগ ইত্যাদি) বাংলায়, শুধু তথ্য ও উদাহরণ দেখায়।
 
 ## চালানো
 
@@ -11,10 +12,19 @@ npm install
 npm run dev      # http://localhost:3100
 ```
 
-`.env.local` ফাইলে শুধু একটাই ভ্যারিয়েবল লাগে:
+`.env.local` ফাইলে দুটি ভ্যারিয়েবল লাগে:
 
 ```
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/pf_calculator?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=<লম্বা র‍্যান্ডম স্ট্রিং>
+NEXT_PUBLIC_SITE_URL=https://your-domain.com   # ঐচ্ছিক, sitemap/canonical-এর জন্য
+```
+
+পুরোনো (একক-ব্যবহারকারী) ডেটা কোনো অ্যাকাউন্টে তুলে দিতে:
+
+```bash
+OWNER_NAME="..." OWNER_EMAIL="..." OWNER_PHONE="01..." OWNER_PASSWORD="..." \
+  node --env-file=.env.local scripts/claim-orphan-years.mjs
 ```
 
 ## হিসাবের নিয়ম
@@ -76,16 +86,24 @@ react-toastify • SweetAlert2
 
 ```
 app/
-├── page.js                  # সংরক্ষিত বছরের তালিকা + সারাংশ
-├── year/new/page.js         # নতুন হিসাব (?carry=1 হলে আগের বছর থেকে আসা ডেটা)
-├── year/[id]/page.js        # সংরক্ষিত বছর খোলা/এডিট
-└── api/years/               # GET তালিকা, POST, এবং [id]-এ GET/PUT/DELETE
+├── (public)/                # বাংলা পাবলিক পেজ + login/register
+├── dashboard/page.js        # নিজের সংরক্ষিত বছরের তালিকা + সারাংশ
+├── dashboard/year/new       # নতুন হিসাব (?carry=1 হলে আগের বছর থেকে আসা ডেটা)
+├── dashboard/year/[id]      # সংরক্ষিত বছর খোলা/এডিট
+├── dashboard/profile        # প্রোফাইল ও পাসওয়ার্ড
+├── api/auth/                # register, login, logout
+├── api/profile/             # প্রোফাইল ও পাসওয়ার্ড আপডেট
+└── api/years/               # ব্যবহারকারী-ভিত্তিক GET/POST, [id]-এ GET/PUT/DELETE
+proxy.js                     # /dashboard লগইন ছাড়া ঢুকতে দেয় না
 lib/
+├── auth.js / session.js     # JWT কুকি, ফোন নম্বর normalize, সার্ভার সেশন
+├── site.js                  # সাইটের নাম, যোগাযোগ, নেভিগেশন
 ├── calc.js                  # পুরো হিসাবের ইঞ্জিন (pure, কোনো React/DB নির্ভরতা নেই)
 ├── constants.js             # অর্থবছরের মাস, ডিফল্ট স্ল্যাব, মোড ও লেবেল
 ├── payload.js               # ইনপুট normalize + inline validation
 └── mongodb.js               # ক্যাশড কানেকশন হেল্পার
-models/PfYear.js             # pf_years কালেকশন
+models/PfYear.js             # pf_years কালেকশন (userId দিয়ে মালিকানা)
+models/User.js               # users কালেকশন
 components/
 ├── YearForm.js              # ইনপুট ফর্ম + লাইভ ফলাফল প্যানেল
 ├── Breakdown.js             # "হিসাবটা কীভাবে হলো" — ধাপে ধাপে ব্যাখ্যা
