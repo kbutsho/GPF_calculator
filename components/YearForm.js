@@ -119,7 +119,7 @@ export default function YearForm({ initial, yearId }) {
         return;
       }
       toast.success(json.message || "সংরক্ষিত হয়েছে");
-      if (!yearId) router.push(`/year/${json.data._id}`);
+      if (!yearId) router.push(`/dashboard/year/${json.data._id}`);
       else router.refresh();
     } catch (e) {
       toast.error(e.message || "সংরক্ষণ করা যায়নি");
@@ -144,7 +144,7 @@ export default function YearForm({ initial, yearId }) {
     const json = await res.json();
     if (!res.ok) return toast.error(json.message || "মুছে ফেলা যায়নি");
     toast.success(json.message);
-    router.push("/");
+    router.push("/dashboard");
   };
 
   /** Start next year's sheet with this year's closing balance already in place. */
@@ -161,7 +161,7 @@ export default function YearForm({ initial, yearId }) {
       rounding: form.rounding,
     });
     sessionStorage.setItem("pf:carry", JSON.stringify(next));
-    router.push("/year/new?carry=1");
+    router.push("/dashboard/year/new?carry=1");
   };
 
   const fy = `জুলাই ${form.startYear} – জুন ${Number(form.startYear) + 1}`;

@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongodb";
 import PfYear from "@/models/PfYear";
 import YearForm from "@/components/YearForm";
 import { normalizeYear } from "@/lib/payload";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,13 @@ export default async function EditYearPage({ params }) {
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) notFound();
 
+  const session = await getSession();
+
   let doc;
   try {
     await dbConnect();
-    doc = await PfYear.findById(id).lean();
+    // Owner filter: another user's year id simply 404s.
+    doc = await PfYear.findOne({ _id: id, userId: session?.id }).lean();
   } catch (e) {
     return (
       <div className="alert alert-danger">
@@ -38,7 +42,7 @@ export default async function EditYearPage({ params }) {
         <h4 className="mb-0">
           অর্থবছর {initial.startYear} – {initial.startYear + 1}
         </h4>
-        <Link href="/" className="btn btn-sm btn-outline-secondary no-print">
+        <Link href="/dashboard" className="btn btn-sm btn-outline-secondary no-print">
           <i className="bi bi-arrow-left me-1" />
           তালিকায় ফিরুন
         </Link>
