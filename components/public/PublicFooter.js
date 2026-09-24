@@ -63,23 +63,43 @@ export default function PublicFooter({ lang }) {
                   "A free tool to work out your General Provident Fund (GPF) slab profit, month-wise subscription profit and year-end closing balance yourself."
                 )}
               </p>
-              <div className="footer-contact">
-                <span className="icon"><i className="bi bi-person" /></span>
-                <span>{c.name[lang]}</span>
-              </div>
-              <div className="footer-contact">
-                <span className="icon"><i className="bi bi-envelope" /></span>
-                <a href={`mailto:${c.email}`}>{c.email}</a>
-              </div>
-              <div className="footer-contact">
-                <span className="icon"><i className="bi bi-telephone" /></span>
-                <a href={`tel:${c.phoneIntl}`}>{c.phone}</a>
-              </div>
-              <div className="footer-contact">
-                <span className="icon"><i className="bi bi-whatsapp" /></span>
-                <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer">
-                  {t("হোয়াটসঅ্যাপে মেসেজ দিন", "Message on WhatsApp")}
-                </a>
+              <div className="footer-card">
+                <div className="footer-card-head">
+                  <span className="footer-avatar" aria-hidden="true">KB</span>
+                  <div>
+                    <div className="footer-card-name">{c.name[lang]}</div>
+                    <div className="footer-card-role">{t("নির্মাতা ও সাপোর্ট", "Creator & support")}</div>
+                  </div>
+                </div>
+                <div className="footer-card-rows">
+                  {[
+                    { icon: "bi-envelope-fill", label: t("ইমেইল", "Email"), value: c.email, href: `mailto:${c.email}` },
+                    { icon: "bi-telephone-fill", label: t("ফোন", "Phone"), value: c.phone, href: `tel:${c.phoneIntl}` },
+                    {
+                      icon: "bi-whatsapp",
+                      label: "WhatsApp",
+                      value: t("মেসেজ দিন", "Send a message"),
+                      href: `https://wa.me/${c.whatsapp}`,
+                      external: true,
+                    },
+                  ].map((row) => (
+                    <a
+                      key={row.label}
+                      href={row.href}
+                      className="footer-card-row"
+                      {...(row.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    >
+                      <span className="footer-card-icon">
+                        <i className={`bi ${row.icon}`} />
+                      </span>
+                      <span className="d-flex flex-column lh-sm overflow-hidden">
+                        <small>{row.label}</small>
+                        <span className="text-truncate">{row.value}</span>
+                      </span>
+                      <i className="bi bi-arrow-up-right ms-auto footer-card-go" />
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
 
