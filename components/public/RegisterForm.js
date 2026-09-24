@@ -201,7 +201,7 @@ export default function RegisterForm() {
           </label>
         </div>
 
-        <button className="btn btn-brand btn-lg w-100 auth-submit" disabled={busy || !agree}>
+        <button className="btn btn-brand w-100 auth-submit" disabled={busy || !agree}>
           {busy ? (
             <>
               <span className="spinner-border spinner-border-sm me-2" />
@@ -219,7 +219,7 @@ export default function RegisterForm() {
       <div className="auth-divider">
         <span>{t("আগেই অ্যাকাউন্ট আছে?", "Already have an account?")}</span>
       </div>
-      <Link href={localePath("/login", lang)} className="btn btn-outline-brand btn-lg w-100">
+      <Link href={localePath("/login", lang)} className="btn btn-outline-brand w-100 auth-alt">
         <i className="bi bi-box-arrow-in-right me-2" />
         {t("লগইন করুন", "Log in")}
       </Link>

@@ -494,6 +494,20 @@ body {
 }
 .auth-input .form-control {
   border-color: #dbe3ec;
+  font-size: 0.95rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+.auth-input .form-control::placeholder {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+.auth-input .input-group-text {
+  font-size: 0.95rem;
+}
+.auth-alt {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 .auth-input .form-control:not(:last-child) {
   border-right: 0;
@@ -522,8 +536,8 @@ body {
   background: #fff !important;
 }
 .auth-submit {
-  padding-top: 0.8rem;
-  padding-bottom: 0.8rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
   font-weight: 600;
   box-shadow: 0 10px 25px rgba(15, 118, 110, 0.25);
 }

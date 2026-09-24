@@ -67,7 +67,7 @@ export default function LoginForm() {
           <label className="form-label fw-medium" htmlFor="identifier">
             {t("মোবাইল নম্বর অথবা ইমেইল", "Mobile number or email")}
           </label>
-          <div className="input-group input-group-lg auth-input">
+          <div className="input-group auth-input">
             <span className="input-group-text">
               <i className={`bi ${byEmail ? "bi-envelope" : "bi-phone"}`} />
             </span>
@@ -88,7 +88,7 @@ export default function LoginForm() {
           <label className="form-label fw-medium" htmlFor="password">
             {t("পাসওয়ার্ড", "Password")}
           </label>
-          <div className="input-group input-group-lg auth-input">
+          <div className="input-group auth-input">
             <span className="input-group-text">
               <i className="bi bi-lock" />
             </span>
@@ -117,7 +117,7 @@ export default function LoginForm() {
             {t("পাসওয়ার্ড ভুলে গেছেন?", "Forgot password?")}
           </Link>
         </div>
-        <button className="btn btn-brand btn-lg w-100 auth-submit" disabled={busy || !identifier || !password}>
+        <button className="btn btn-brand w-100 auth-submit" disabled={busy || !identifier || !password}>
           {busy ? (
             <>
               <span className="spinner-border spinner-border-sm me-2" />
@@ -135,7 +135,7 @@ export default function LoginForm() {
       <div className="auth-divider">
         <span>{t("নতুন এখানে?", "New here?")}</span>
       </div>
-      <Link href={localePath("/register", lang)} className="btn btn-outline-brand btn-lg w-100">
+      <Link href={localePath("/register", lang)} className="btn btn-outline-brand w-100 auth-alt">
         <i className="bi bi-person-plus me-2" />
         {t("ফ্রি অ্যাকাউন্ট খুলুন", "Create a free account")}
       </Link>
