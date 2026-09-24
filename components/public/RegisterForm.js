@@ -3,8 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { useLang } from "@/components/LangProvider";
+import { localePath } from "@/lib/i18n";
 
 export default function RegisterForm() {
+  const { lang, t } = useLang();
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", confirm: "" });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -15,7 +18,7 @@ export default function RegisterForm() {
   const submit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirm) {
-      setErrors({ confirm: "দুটি পাসওয়ার্ড মিলছে না" });
+      setErrors({ confirm: t("দুটি পাসওয়ার্ড মিলছে না", "The passwords don't match") });
       return;
     }
     setBusy(true);
@@ -29,13 +32,13 @@ export default function RegisterForm() {
       const json = await res.json();
       if (!res.ok) {
         setErrors(json.errors || {});
-        toast.error(json.message || "রেজিস্ট্রেশন করা যায়নি");
+        toast.error(json.message || t("রেজিস্ট্রেশন করা যায়নি", "Could not sign up"));
         return;
       }
       toast.success(json.message);
       window.location.assign("/dashboard");
     } catch (err) {
-      toast.error(err.message || "রেজিস্ট্রেশন করা যায়নি");
+      toast.error(err.message || t("রেজিস্ট্রেশন করা যায়নি", "Could not sign up"));
     } finally {
       setBusy(false);
     }
@@ -68,33 +71,33 @@ export default function RegisterForm() {
           <span className="brand-mark mb-2" style={{ width: 52, height: 52, fontSize: "1.4rem" }}>
             <i className="bi bi-person-plus" />
           </span>
-          <h4 className="fw-bold mb-1">ফ্রি অ্যাকাউন্ট খুলুন</h4>
-          <div className="text-secondary small">এক মিনিটেই শুরু করুন আপনার GPF হিসাব</div>
+          <h1 className="h4 fw-bold mb-1">{t("ফ্রি অ্যাকাউন্ট খুলুন", "Create a free account")}</h1>
+          <div className="text-secondary small">{t("এক মিনিটেই শুরু করুন আপনার GPF হিসাব", "Start your GPF records in a minute")}</div>
         </div>
 
         <form onSubmit={submit} noValidate>
-          {field("name", "পুরো নাম", { autoComplete: "name", required: true })}
+          {field("name", t("পুরো নাম", "Full name"), { autoComplete: "name", required: true })}
           {field(
             "phone",
-            "মোবাইল নম্বর",
+            t("মোবাইল নম্বর", "Mobile number"),
             { type: "tel", placeholder: "01XXXXXXXXX", autoComplete: "tel", required: true },
-            "এই নম্বর দিয়ে লগইন করবেন"
+            t("এই নম্বর দিয়ে লগইন করবেন", "You'll log in with this number")
           )}
           {field(
             "email",
             <>
-              ইমেইল <span className="text-secondary small">(ঐচ্ছিক)</span>
+              {t("ইমেইল", "Email")} <span className="text-secondary small">({t("ঐচ্ছিক", "optional")})</span>
             </>,
             { type: "email", placeholder: "you@example.com", autoComplete: "email" },
-            "দিলে ইমেইল দিয়েও লগইন করা যাবে"
+            t("দিলে ইমেইল দিয়েও লগইন করা যাবে", "Add it to log in by email as well")
           )}
           {field(
             "password",
-            "পাসওয়ার্ড",
+            t("পাসওয়ার্ড", "Password"),
             { type: show ? "text" : "password", autoComplete: "new-password", required: true },
-            "অন্তত ৬ অক্ষর"
+            t("অন্তত ৬ অক্ষর", "At least 6 characters")
           )}
-          {field("confirm", "পাসওয়ার্ড আবার লিখুন", {
+          {field("confirm", t("পাসওয়ার্ড আবার লিখুন", "Repeat password"), {
             type: show ? "text" : "password",
             autoComplete: "new-password",
             required: true,
@@ -108,20 +111,24 @@ export default function RegisterForm() {
               onChange={(e) => setShow(e.target.checked)}
             />
             <label className="form-check-label small" htmlFor="show-pass">
-              পাসওয়ার্ড দেখান
+              {t("পাসওয়ার্ড দেখান", "Show password")}
             </label>
           </div>
           <button className="btn btn-brand btn-lg w-100" disabled={busy}>
-            {busy ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট খুলুন"}
+            {busy ? t("অ্যাকাউন্ট তৈরি হচ্ছে...", "Creating account...") : t("অ্যাকাউন্ট খুলুন", "Create account")}
           </button>
           <p className="small text-secondary text-center mt-3 mb-0">
-            অ্যাকাউন্ট খুলে আপনি আমাদের <Link href="/terms">শর্তাবলি</Link> ও{" "}
-            <Link href="/privacy">গোপনীয়তা নীতি</Link> মেনে নিচ্ছেন।
+            {t("অ্যাকাউন্ট খুলে আপনি আমাদের ", "By signing up you accept our ")}
+            <Link href={localePath("/terms", lang)}>{t("শর্তাবলি", "terms")}</Link>
+            {t(" ও ", " and ")}
+            <Link href={localePath("/privacy", lang)}>{t("গোপনীয়তা নীতি", "privacy policy")}</Link>
+            {t(" মেনে নিচ্ছেন।", ".")}
           </p>
         </form>
 
         <div className="text-center small mt-4">
-          আগেই অ্যাকাউন্ট আছে? <Link href="/login">লগইন করুন</Link>
+          {t("আগেই অ্যাকাউন্ট আছে?", "Already have an account?")}{" "}
+          <Link href={localePath("/login", lang)}>{t("লগইন করুন", "Log in")}</Link>
         </div>
       </div>
     </div>

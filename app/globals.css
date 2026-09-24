@@ -37,7 +37,11 @@ body {
   color: var(--app-muted);
   font-weight: 500;
   border-radius: 8px;
-  padding: 0.4rem 0.75rem !important;
+  padding: 0.4rem 0.6rem !important;
+  white-space: nowrap;
+}
+.public-navbar .btn {
+  white-space: nowrap;
 }
 .public-navbar .nav-link:hover,
 .public-navbar .nav-link.active {
