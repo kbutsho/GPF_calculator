@@ -11,7 +11,7 @@ import { useLang, LangSwitcher } from "@/components/LangProvider";
  * Top bar for the private areas. `links` is [{ href, icon, bn, en, exact? }];
  * the dashboard and the admin panel pass their own sets.
  */
-export default function DashboardNavbar({ userName, links, brandHref = "/dashboard", badge }) {
+export default function DashboardNavbar({ userName, links, badge }) {
   const { lang, t } = useLang();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -30,7 +30,8 @@ export default function DashboardNavbar({ userName, links, brandHref = "/dashboa
   return (
     <nav className="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">
       <div className="container">
-        <Link className="navbar-brand d-flex align-items-center gap-2" href={brandHref}>
+        {/* Logo leads back to the public site; the proxy picks its bn/en version. */}
+        <Link className="navbar-brand d-flex align-items-center gap-2" href="/" title={t("ওয়েবসাইটের হোম পেজ", "Website home page")}>
           <i className="bi bi-calculator-fill" />
           <span>{SITE.name[lang]}</span>
           {badge && <span className="badge bg-warning text-dark small">{badge}</span>}
@@ -60,7 +61,7 @@ export default function DashboardNavbar({ userName, links, brandHref = "/dashboa
               </li>
             ))}
             <li className="nav-item">
-              <Link href={lang === "en" ? "/en" : "/"} className="nav-link" onClick={() => setOpen(false)}>
+              <Link href="/" className="nav-link" onClick={() => setOpen(false)}>
                 <i className="bi bi-globe me-1" />
                 {t("ওয়েবসাইট", "Website")}
               </Link>

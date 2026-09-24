@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }) {
 
   return (
     <>
-      <DashboardNavbar userName={user.name} links={LINKS} brandHref="/admin" badge={t("অ্যাডমিন", "Admin")} />
+      <DashboardNavbar userName={user.name} links={LINKS} badge={t("অ্যাডমিন", "Admin")} />
       <main className="container py-4">{children}</main>
     </>
   );

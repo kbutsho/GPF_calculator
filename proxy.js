@@ -24,10 +24,8 @@ export function proxy(request) {
 
   if (bare.startsWith("/dashboard") || bare.startsWith("/admin")) {
     if (isEnglishUrl) {
-      // Private pages have no /en twin; remember the choice and drop the prefix.
-      const res = NextResponse.redirect(new URL(bare + search, request.url));
-      res.cookies.set(LANG_COOKIE, "en", { path: "/", maxAge: YEAR, sameSite: "lax" });
-      return res;
+      // Private pages have no /en twin and keep their own language; drop the prefix.
+      return NextResponse.redirect(new URL(bare + search, request.url));
     }
     if (!session) {
       const loginUrl = new URL("/login", request.url);

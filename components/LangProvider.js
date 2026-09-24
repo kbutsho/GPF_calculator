@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LANG_COOKIE, tr, localePath, stripLocale, isPrivatePath } from "@/lib/i18n";
+import { LANG_COOKIE, APP_LANG_COOKIE, tr, localePath, stripLocale, isPrivatePath } from "@/lib/i18n";
 
 const LangContext = createContext({ lang: "bn", t: tr("bn") });
 
@@ -13,7 +13,10 @@ export function LangProvider({ lang, children }) {
 
 export const useLang = () => useContext(LangContext);
 
-/** বাংলা / English toggle. Public pages move to the other URL; private pages re-render in place. */
+/**
+ * বাংলা / English toggle. Public pages move to the other URL; private pages
+ * re-render in place. Each side stores its choice in its own cookie.
+ */
 export function LangSwitcher({ className = "", dark = false }) {
   const { lang } = useLang();
   const pathname = usePathname();
@@ -21,8 +24,9 @@ export function LangSwitcher({ className = "", dark = false }) {
 
   const switchTo = (next) => {
     if (next === lang) return;
-    document.cookie = `${LANG_COOKIE}=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
     const bare = stripLocale(pathname);
+    const cookie = isPrivatePath(bare) ? APP_LANG_COOKIE : LANG_COOKIE;
+    document.cookie = `${cookie}=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
     if (isPrivatePath(bare)) {
       // refresh() keeps client state, so a half-filled form survives the switch.
       router.refresh();
