@@ -1,90 +1,121 @@
 import Link from "next/link";
-import { PUBLIC_NAV, FOOTER_LINKS, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
+import { ARTICLES } from "@/lib/articles";
 import { tr, localePath } from "@/lib/i18n";
+import FooterLangLinks from "@/components/public/FooterLangLinks";
 
 export default function PublicFooter({ lang }) {
   const t = tr(lang);
   const c = SITE.contact;
-  const href = (path) => localePath(path, lang);
+  const href = (p) => localePath(p, lang);
+
+  const columns = [
+    {
+      title: t("টুল", "Product"),
+      links: [
+        ["/features", t("সুবিধাসমূহ", "Features")],
+        ["/how-it-works", t("কীভাবে কাজ করে", "How it works")],
+        ["/profit-rates", t("মুনাফার হার", "Profit rates")],
+        ["/register", t("ফ্রি অ্যাকাউন্ট", "Create account")],
+        ["/login", t("লগইন", "Log in")],
+      ],
+    },
+    {
+      title: t("শিখুন", "Learn"),
+      links: [
+        ["/gpf-guide", t("GPF নির্দেশিকা", "GPF guide")],
+        ["/glossary", t("GPF পরিভাষা", "GPF glossary")],
+        ["/faq", t("প্রশ্নোত্তর", "FAQ")],
+        ["/articles", t("সব লেখা", "All articles")],
+      ],
+    },
+    {
+      title: t("জনপ্রিয় লেখা", "Popular reads"),
+      links: ARTICLES.slice(0, 4).map((a) => [`/articles/${a.slug}`, a[lang].short || a[lang].title]),
+    },
+    {
+      title: t("প্রতিষ্ঠান", "Company"),
+      links: [
+        ["/about", t("আমাদের সম্পর্কে", "About")],
+        ["/contact", t("যোগাযোগ", "Contact")],
+        ["/privacy", t("গোপনীয়তা নীতি", "Privacy policy")],
+        ["/terms", t("ব্যবহারের শর্তাবলি", "Terms of use")],
+      ],
+    },
+  ];
+
   return (
     <footer className="public-footer">
-      <div className="container">
-        <div className="row g-4">
-          <div className="col-lg-4">
-            <div className="d-flex align-items-center gap-2 mb-2 fs-5 fw-semibold text-white">
-              <span className="brand-mark">
-                <i className="bi bi-calculator-fill" />
-              </span>
-              {SITE.name[lang]}
-            </div>
-            <p className="small mb-0">
-              {t(
-                "সাধারণ ভবিষ্য তহবিলের (GPF) বছর সমাপনী মুনাফা ও ক্লোজিং ব্যালেন্স নিজেই হিসাব করার একটি সহজ, বিনামূল্যের টুল। অফিসের স্টেটমেন্ট আসার আগেই জেনে নিন আপনার তহবিলে কত জমল।",
-                "A simple, free tool to work out your General Provident Fund (GPF) year-end profit and closing balance yourself — know what your fund holds before the official statement arrives."
-              )}
-            </p>
-          </div>
-          <div className="col-6 col-lg-2">
-            <h2 className="h6 text-white">{t("পেজসমূহ", "Pages")}</h2>
-            <ul className="list-unstyled small mb-0">
-              {PUBLIC_NAV.map((l) => (
-                <li key={l.href}>
-                  <Link href={href(l.href)}>{l[lang]}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="col-6 col-lg-2">
-            <h2 className="h6 text-white">{t("আরও", "More")}</h2>
-            <ul className="list-unstyled small mb-0">
-              {FOOTER_LINKS.map((l) => (
-                <li key={l.href}>
-                  <Link href={href(l.href)}>{l[lang]}</Link>
-                </li>
-              ))}
-              <li>
-                <Link href={href("/register")}>{t("অ্যাকাউন্ট খুলুন", "Create account")}</Link>
-              </li>
-              <li>
-                <Link href={href("/login")}>{t("লগইন", "Log in")}</Link>
-              </li>
-            </ul>
-          </div>
-          <div className="col-lg-4">
-            <h2 className="h6 text-white">{t("যোগাযোগ", "Contact")}</h2>
-            <ul className="list-unstyled small mb-0 d-flex flex-column gap-1">
-              <li>
-                <i className="bi bi-person me-2" />
-                {c.name[lang]}
-              </li>
-              <li>
-                <i className="bi bi-envelope me-2" />
+      {/* ---- links ---- */}
+      <div className="footer-main">
+        <div className="container">
+          <div className="row g-4">
+            <div className="col-lg-4">
+              <Link href={href("/")} className="d-inline-flex align-items-center gap-2 mb-3 fs-5 fw-semibold text-white">
+                <span className="brand-mark">
+                  <i className="bi bi-calculator-fill" />
+                </span>
+                {SITE.name[lang]}
+              </Link>
+              <p className="footer-brand-text">
+                {t(
+                  "সাধারণ ভবিষ্য তহবিলের (GPF) স্ল্যাব-ভিত্তিক মুনাফা, মাসভিত্তিক চাঁদার মুনাফা ও বছর শেষের সমাপনী জমা নিজেই হিসাব করার বিনামূল্যের টুল।",
+                  "A free tool to work out your General Provident Fund (GPF) slab profit, month-wise subscription profit and year-end closing balance yourself."
+                )}
+              </p>
+              <div className="footer-contact">
+                <span className="icon"><i className="bi bi-person" /></span>
+                <span>{c.name[lang]}</span>
+              </div>
+              <div className="footer-contact">
+                <span className="icon"><i className="bi bi-envelope" /></span>
                 <a href={`mailto:${c.email}`}>{c.email}</a>
-              </li>
-              <li>
-                <i className="bi bi-telephone me-2" />
+              </div>
+              <div className="footer-contact">
+                <span className="icon"><i className="bi bi-telephone" /></span>
                 <a href={`tel:${c.phoneIntl}`}>{c.phone}</a>
-              </li>
-              <li>
-                <i className="bi bi-whatsapp me-2" />
+              </div>
+              <div className="footer-contact">
+                <span className="icon"><i className="bi bi-whatsapp" /></span>
                 <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer">
                   {t("হোয়াটসঅ্যাপে মেসেজ দিন", "Message on WhatsApp")}
                 </a>
-              </li>
-            </ul>
+              </div>
+            </div>
+
+            {columns.map((col) => (
+              <div className="col-6 col-md-3 col-lg-2" key={col.title}>
+                <h2 className="footer-heading">{col.title}</h2>
+                <ul className="footer-links">
+                  {col.links.map(([p, label]) => (
+                    <li key={p}>
+                      <Link href={href(p)}>{label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="footer-badges">
+            <span><i className="bi bi-shield-check me-1" />{t("এনক্রিপ্টেড পাসওয়ার্ড", "Encrypted passwords")}</span>
+            <span><i className="bi bi-eye-slash me-1" />{t("কোনো বিজ্ঞাপন বা ট্র্যাকিং নেই", "No ads or tracking")}</span>
+            <span><i className="bi bi-bullseye me-1" />{t("পয়সা পর্যন্ত নির্ভুল", "Accurate to the paisa")}</span>
+            <span><i className="bi bi-translate me-1" />{t("বাংলা ও ইংরেজি", "Bangla & English")}</span>
           </div>
         </div>
-        <hr className="border-secondary my-4" />
-        <div className="d-flex flex-wrap justify-content-between gap-2 small">
+      </div>
+
+      {/* ---- bottom bar ---- */}
+      <div className="footer-bottom">
+        <div className="container d-flex flex-wrap justify-content-between align-items-center gap-2">
           <span>
-            © {new Date().getFullYear()} {SITE.name[lang]} — {t("তৈরি করেছেন", "Made by")} {c.name[lang]}
+            © {new Date().getFullYear()} {SITE.name[lang]}. {t("সর্বস্বত্ব সংরক্ষিত।", "All rights reserved.")}{" "}
+            <span className="d-none d-md-inline">
+              {t("এটি একটি ব্যক্তিগত উদ্যোগ, সরকারি ওয়েবসাইট নয়।", "An independent project, not a government website.")}
+            </span>
           </span>
-          <span>
-            {t(
-              "এটি একটি ব্যক্তিগত উদ্যোগ; কোনো সরকারি প্রতিষ্ঠানের অফিসিয়াল ওয়েবসাইট নয়।",
-              "An independent project — not an official government website."
-            )}
-          </span>
+          <FooterLangLinks />
         </div>
       </div>
     </footer>
