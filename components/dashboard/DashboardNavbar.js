@@ -11,7 +11,7 @@ import { useLang, LangSwitcher } from "@/components/LangProvider";
  * Top bar for the private areas. `links` is [{ href, icon, bn, en, exact? }];
  * the dashboard and the admin panel pass their own sets.
  */
-export default function DashboardNavbar({ userName, links, badge }) {
+export default function DashboardNavbar({ links, badge }) {
   const { lang, t } = useLang();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -69,10 +69,6 @@ export default function DashboardNavbar({ userName, links, badge }) {
           </ul>
           <div className="d-flex flex-wrap align-items-center gap-2 py-2 py-lg-0">
             <LangSwitcher dark />
-            <span className="text-white small">
-              <i className="bi bi-person-circle me-1" />
-              {userName}
-            </span>
             <button className="btn btn-sm btn-outline-light" onClick={logout}>
               <i className="bi bi-box-arrow-right me-1" />
               {t("লগআউট", "Log out")}

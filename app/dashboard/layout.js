@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <>
-      <DashboardNavbar userName={user.name} links={links} />
+      <DashboardNavbar links={links} />
       <main className="container py-4">{children}</main>
       <footer className="text-center text-muted small py-4">
         {t("জুলাই – জুন অর্থবছর • স্ল্যাব ভিত্তিক প্রফিট হিসাব", "July – June fiscal year • slab-based profit")}
