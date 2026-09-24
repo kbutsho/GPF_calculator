@@ -2,19 +2,25 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import { authCookie, tokenFor, normalizePhone } from "@/lib/auth";
+import { authCookie, tokenFor, normalizePhone, homeFor } from "@/lib/auth";
 import { UserStatus } from "@/lib/constants";
+import { requestLang } from "@/lib/lang";
+import { tr } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request) {
+  const t = tr(requestLang(request));
   try {
     const body = await request.json();
     const identifier = String(body.identifier || "").trim();
     const password = String(body.password || "");
 
     if (!identifier || !password) {
-      return NextResponse.json({ message: "মোবাইল/ইমেইল আর পাসওয়ার্ড দিন" }, { status: 400 });
+      return NextResponse.json(
+        { message: t("মোবাইল/ইমেইল আর পাসওয়ার্ড দিন", "Enter your mobile/email and password") },
+        { status: 400 }
+      );
     }
 
     await dbConnect();
@@ -25,16 +31,27 @@ export async function POST(request) {
     const user = await User.findOne(query);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return NextResponse.json({ message: "মোবাইল/ইমেইল অথবা পাসওয়ার্ড ভুল" }, { status: 401 });
+      return NextResponse.json(
+        { message: t("মোবাইল/ইমেইল অথবা পাসওয়ার্ড ভুল", "Wrong mobile/email or password") },
+        { status: 401 }
+      );
     }
     if (user.status !== UserStatus.ACTIVE) {
-      return NextResponse.json({ message: "এই অ্যাকাউন্টটি নিষ্ক্রিয় করা আছে" }, { status: 403 });
+      return NextResponse.json(
+        { message: t("এই অ্যাকাউন্টটি নিষ্ক্রিয় করা আছে", "This account has been deactivated") },
+        { status: 403 }
+      );
     }
 
-    const response = NextResponse.json({ message: `স্বাগতম, ${user.name}` });
+    await User.updateOne({ _id: user._id }, { $set: { lastLoginAt: new Date() } });
+
+    const response = NextResponse.json({
+      message: t(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`),
+      home: homeFor(user.role),
+    });
     response.headers.set("Set-Cookie", authCookie(tokenFor(user)));
     return response;
   } catch (e) {
-    return NextResponse.json({ message: e.message || "লগইন করা যায়নি" }, { status: 500 });
+    return NextResponse.json({ message: e.message || t("লগইন করা যায়নি", "Could not log in") }, { status: 500 });
   }
 }

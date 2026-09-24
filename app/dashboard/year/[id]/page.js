@@ -6,6 +6,8 @@ import PfYear from "@/models/PfYear";
 import YearForm from "@/components/YearForm";
 import { normalizeYear } from "@/lib/payload";
 import { getSession } from "@/lib/session";
+import { getLang } from "@/lib/lang";
+import { tr } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,8 @@ export default async function EditYearPage({ params }) {
   const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) notFound();
 
-  const session = await getSession();
+  const [session, lang] = await Promise.all([getSession(), getLang()]);
+  const t = tr(lang);
 
   let doc;
   try {
@@ -24,7 +27,7 @@ export default async function EditYearPage({ params }) {
     return (
       <div className="alert alert-danger">
         <i className="bi bi-exclamation-octagon me-2" />
-        ডেটাবেজে যুক্ত হওয়া যায়নি — <code>{e.message}</code>
+        {t("ডেটাবেজে যুক্ত হওয়া যায়নি", "Could not connect to the database")} — <code>{e.message}</code>
       </div>
     );
   }
@@ -39,17 +42,17 @@ export default async function EditYearPage({ params }) {
   return (
     <>
       <div className="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-1">
-        <h4 className="mb-0">
-          অর্থবছর {initial.startYear} – {initial.startYear + 1}
-        </h4>
+        <h1 className="h4 mb-0">
+          {t("অর্থবছর", "Fiscal year")} {initial.startYear} – {initial.startYear + 1}
+        </h1>
         <Link href="/dashboard" className="btn btn-sm btn-outline-secondary no-print">
           <i className="bi bi-arrow-left me-1" />
-          তালিকায় ফিরুন
+          {t("তালিকায় ফিরুন", "Back to list")}
         </Link>
       </div>
       <p className="section-hint mb-4">
-        {initial.subscriber || "গ্রাহকের নাম দেওয়া নেই"}
-        {initial.accountNo ? ` • অ্যাকাউন্ট ${initial.accountNo}` : ""}
+        {initial.subscriber || t("গ্রাহকের নাম দেওয়া নেই", "No subscriber name")}
+        {initial.accountNo ? ` • ${t("অ্যাকাউন্ট", "Account")} ${initial.accountNo}` : ""}
       </p>
 
       <YearForm initial={initial} yearId={id} />

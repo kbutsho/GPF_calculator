@@ -3,8 +3,15 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import YearForm, { blankYear } from "@/components/YearForm";
+import { useLang } from "@/components/LangProvider";
+
+function Loading() {
+  const { t } = useLang();
+  return <div className="text-center text-muted py-5">{t("লোড হচ্ছে...", "Loading...")}</div>;
+}
 
 function NewYearInner() {
+  const { t } = useLang();
   const params = useSearchParams();
   const carry = params.get("carry");
   const [initial, setInitial] = useState(null);
@@ -33,15 +40,16 @@ function NewYearInner() {
     setInitial(carried || blankYear());
   }, [carry]);
 
-  if (!initial) {
-    return <div className="text-center text-muted py-5">লোড হচ্ছে...</div>;
-  }
+  if (!initial) return <Loading />;
 
   return (
     <>
-      <h4 className="mb-1">নতুন বছরের হিসাব</h4>
+      <h1 className="h4 mb-1">{t("নতুন বছরের হিসাব", "New year calculation")}</h1>
       <p className="section-hint mb-4">
-        বাঁ পাশে তথ্য দিন — ডান পাশে ফলাফল সাথে সাথেই আপডেট হবে। সংরক্ষণ না করলেও হিসাব দেখা যাবে।
+        {t(
+          "বাঁ পাশে তথ্য দিন — ডান পাশে ফলাফল সাথে সাথেই আপডেট হবে। সংরক্ষণ না করলেও হিসাব দেখা যাবে।",
+          "Enter the details on the left — the result on the right updates instantly, even before you save."
+        )}
       </p>
       <YearForm initial={initial} />
     </>
@@ -50,7 +58,7 @@ function NewYearInner() {
 
 export default function NewYearPage() {
   return (
-    <Suspense fallback={<div className="text-center text-muted py-5">লোড হচ্ছে...</div>}>
+    <Suspense fallback={<Loading />}>
       <NewYearInner />
     </Suspense>
   );
