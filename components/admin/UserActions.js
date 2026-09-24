@@ -7,7 +7,11 @@ import Swal from "sweetalert2";
 import { useLang } from "@/components/LangProvider";
 import { UserStatus } from "@/lib/constants";
 
-export default function UserActions({ userId, status, isSelf }) {
+// Names are user-supplied and go into SweetAlert html, so escape them.
+const escapeHtml = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+export default function UserActions({ userId, userName, status, isSelf, yearCount }) {
   const router = useRouter();
   const { t } = useLang();
   const [busy, setBusy] = useState(false);
@@ -19,12 +23,11 @@ export default function UserActions({ userId, status, isSelf }) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: body ? JSON.stringify(body) : undefined,
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message);
       toast.success(json.message);
-      router.refresh();
       return true;
     } catch (e) {
       toast.error(e.message || t("কাজটি করা যায়নি", "Something went wrong"));
@@ -47,9 +50,9 @@ export default function UserActions({ userId, status, isSelf }) {
       confirmButtonColor: active ? "#dc3545" : "#0f766e",
     });
     if (!ok.isConfirmed) return;
-    call(`/api/admin/users/${userId}`, "PATCH", {
-      status: active ? UserStatus.INACTIVE : UserStatus.ACTIVE,
-    });
+    if (await call(`/api/admin/users/${userId}`, "PATCH", { status: active ? UserStatus.INACTIVE : UserStatus.ACTIVE })) {
+      router.refresh();
+    }
   };
 
   const resetPassword = async () => {
@@ -68,6 +71,29 @@ export default function UserActions({ userId, status, isSelf }) {
     call(`/api/admin/users/${userId}/password`, "PUT", { password: value });
   };
 
+  const removeUser = async () => {
+    // Deleting takes the user's saved years with it, so ask for the name as proof of intent.
+    const { value } = await Swal.fire({
+      title: t("ব্যবহারকারী মুছে ফেলবেন?", "Delete this user?"),
+      html: t(
+        `<b>${escapeHtml(userName)}</b> এবং তাঁর <b>${yearCount}টি</b> সংরক্ষিত হিসাব স্থায়ীভাবে মুছে যাবে। নিশ্চিত করতে নামটি লিখুন।`,
+        `<b>${escapeHtml(userName)}</b> and <b>${yearCount}</b> saved year(s) will be permanently deleted. Type the name to confirm.`
+      ),
+      icon: "warning",
+      input: "text",
+      showCancelButton: true,
+      confirmButtonText: t("মুছে ফেলুন", "Delete"),
+      cancelButtonText: t("বাতিল", "Cancel"),
+      confirmButtonColor: "#dc3545",
+      inputValidator: (v) => (v?.trim() !== userName ? t("নাম মিলছে না", "The name doesn't match") : undefined),
+    });
+    if (!value) return;
+    if (await call(`/api/admin/users/${userId}`, "DELETE")) {
+      router.push("/admin/users");
+      router.refresh();
+    }
+  };
+
   return (
     <div className="card h-100">
       <div className="card-header">
@@ -80,15 +106,18 @@ export default function UserActions({ userId, status, isSelf }) {
           {t("পাসওয়ার্ড রিসেট", "Reset password")}
         </button>
         <button
-          className={`btn ${active ? "btn-outline-danger" : "btn-outline-success"}`}
+          className={`btn ${active ? "btn-outline-warning" : "btn-outline-success"}`}
           onClick={toggleStatus}
           disabled={busy || isSelf}
-          title={isSelf ? t("নিজের অ্যাকাউন্ট নিষ্ক্রিয় করা যায় না", "You can't deactivate yourself") : undefined}
         >
           <i className={`bi ${active ? "bi-person-x" : "bi-person-check"} me-1`} />
           {active ? t("নিষ্ক্রিয় করুন", "Deactivate") : t("সক্রিয় করুন", "Activate")}
         </button>
-        {isSelf && <div className="section-hint">{t("এটি আপনার নিজের অ্যাকাউন্ট।", "This is your own account.")}</div>}
+        <button className="btn btn-outline-danger" onClick={removeUser} disabled={busy || isSelf}>
+          <i className="bi bi-trash me-1" />
+          {t("ব্যবহারকারী মুছে ফেলুন", "Delete user")}
+        </button>
+        {isSelf && <div className="section-hint">{t("এটি আপনার নিজের অ্যাকাউন্ট — নিষ্ক্রিয় বা মোছা যাবে না।", "This is your own account — it can't be deactivated or deleted.")}</div>}
       </div>
     </div>
   );

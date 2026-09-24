@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import { requireAdmin } from "@/lib/auth";
+import { requireActiveAdmin } from "@/lib/adminAuth";
 import { requestLang } from "@/lib/lang";
 import { tr } from "@/lib/i18n";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 /** Admin sets a new password for a user who forgot theirs. */
 export async function PUT(request, { params }) {
   const t = tr(requestLang(request));
-  const admin = requireAdmin(request);
+  const admin = await requireActiveAdmin(request);
   if (!admin) return NextResponse.json({ message: t("অনুমতি নেই", "Not allowed") }, { status: 403 });
 
   const { id } = await params;

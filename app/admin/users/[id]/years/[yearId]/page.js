@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import PfYear from "@/models/PfYear";
 import YearForm from "@/components/YearForm";
+import DeleteYearButton from "@/components/admin/DeleteYearButton";
 import { normalizeYear } from "@/lib/payload";
 import { getLang } from "@/lib/lang";
 import { tr } from "@/lib/i18n";
@@ -34,10 +35,13 @@ export default async function AdminYearPage({ params }) {
         <h1 className="h4 mb-0">
           {user.name} — {t("অর্থবছর", "fiscal year")} {initial.startYear} – {initial.startYear + 1}
         </h1>
-        <Link href={`/admin/users/${id}`} className="btn btn-sm btn-outline-secondary no-print">
-          <i className="bi bi-arrow-left me-1" />
-          {t("ব্যবহারকারীতে ফিরুন", "Back to user")}
-        </Link>
+        <div className="d-flex gap-2">
+          <DeleteYearButton yearId={yearId} userId={id} label={`${initial.startYear}–${initial.startYear + 1}`} />
+          <Link href={`/admin/users/${id}`} className="btn btn-sm btn-outline-secondary no-print">
+            <i className="bi bi-arrow-left me-1" />
+            {t("ব্যবহারকারীতে ফিরুন", "Back to user")}
+          </Link>
+        </div>
       </div>
       <p className="section-hint mb-3">
         {initial.subscriber || t("গ্রাহকের নাম দেওয়া নেই", "No subscriber name")}
@@ -45,7 +49,7 @@ export default async function AdminYearPage({ params }) {
       </p>
       <div className="alert alert-info py-2 small no-print">
         <i className="bi bi-eye me-1" />
-        {t("শুধু দেখার জন্য — অ্যাডমিন এখান থেকে ব্যবহারকারীর হিসাব বদলাতে পারেন না।", "Read-only — admins can't change a user's calculation here.")}
+        {t("হিসাবটি শুধু দেখা যায় — ইনপুট বদলানো যায় না, তবে দরকারে পুরো বছরটি মুছে ফেলা যায়।", "View only — the figures can't be edited, but the whole year can be deleted if needed.")}
       </div>
 
       <YearForm initial={initial} readOnly />
