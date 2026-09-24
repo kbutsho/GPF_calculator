@@ -32,6 +32,9 @@ export async function generateMetadata() {
     publisher: SITE.contact.name.en,
     category: "finance",
     formatDetection: { telephone: false },
+    alternates: {
+      types: { "application/rss+xml": [{ url: "/feed.xml", title: `${name} RSS` }] },
+    },
     robots: {
       index: true,
       follow: true,

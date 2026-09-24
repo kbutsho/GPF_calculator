@@ -10,12 +10,14 @@ const PRIORITY = {
   "/faq": 0.8,
   "/features": 0.8,
   "/articles": 0.8,
+  "/glossary": 0.7,
 };
 
 // Every public page in both languages, each entry carrying its hreflang twins.
 export default function sitemap() {
   const pages = [
-    ...new Set(["/", ...[...PUBLIC_NAV, ...FOOTER_LINKS].map((l) => l.href), "/register", "/login"]),
+    // /login is noindex, so it stays out of the sitemap.
+    ...new Set(["/", ...[...PUBLIC_NAV, ...FOOTER_LINKS].map((l) => l.href), "/glossary", "/register"]),
   ].map((path) => ({ path, lastModified: new Date("2026-09-24") }));
   const articles = ARTICLES.map((a) => ({ path: `/articles/${a.slug}`, lastModified: new Date(a.date) }));
 

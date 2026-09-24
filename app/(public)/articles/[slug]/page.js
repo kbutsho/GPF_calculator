@@ -41,10 +41,15 @@ function projection() {
   return rows;
 }
 
-function Block({ block, lang }) {
+function Block({ block, lang, id }) {
   const [type, content] = block;
   const t = tr(lang);
-  if (type === "h2") return <h2>{content}</h2>;
+  if (type === "h2")
+    return (
+      <h2 id={id} style={{ scrollMarginTop: 90 }}>
+        {content}
+      </h2>
+    );
   if (type === "p") return <p>{content}</p>;
   if (type === "ul")
     return (
@@ -107,6 +112,12 @@ export default async function ArticlePage({ params }) {
   const a = article[lang];
   const path = `/articles/${slug}`;
   const others = ARTICLES.filter((x) => x.slug !== slug).slice(0, 3);
+  const headings = a.body
+    .map((b, i) => (b[0] === "h2" ? { id: `s${i}`, text: b[1] } : null))
+    .filter(Boolean);
+  // ~200 words a minute, counted over every text block.
+  const words = a.body.flatMap((b) => [].concat(b[1] || [])).join(" ").split(/\s+/).length;
+  const minutes = Math.max(1, Math.round(words / 200));
 
   return (
     <>
@@ -131,10 +142,29 @@ export default async function ArticlePage({ params }) {
                 year: "numeric",
               })}
             </time>
+            <span className="mx-2">·</span>
+            <i className="bi bi-clock me-1" />
+            {t(`${localNum(minutes, lang)} মিনিটে পড়ুন`, `${minutes} min read`)}
           </div>
+          {headings.length > 1 && (
+            <nav className="card mb-4" aria-label={t("সূচিপত্র", "Contents")}>
+              <div className="card-body py-3">
+                <div className="fw-semibold small mb-2">{t("এই লেখায়", "In this article")}</div>
+                <ol className="small mb-0 ps-3">
+                  {headings.map((h) => (
+                    <li key={h.id}>
+                      <a href={`#${h.id}`} className="text-decoration-none">
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </nav>
+          )}
           <article className="prose">
             {a.body.map((block, i) => (
-              <Block key={i} block={block} lang={lang} />
+              <Block key={i} block={block} lang={lang} id={`s${i}`} />
             ))}
           </article>
 
