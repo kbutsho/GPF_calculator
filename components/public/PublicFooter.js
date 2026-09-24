@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
-import { ARTICLES } from "@/lib/articles";
 import { tr, localePath } from "@/lib/i18n";
 import FooterLangLinks from "@/components/public/FooterLangLinks";
 
@@ -17,21 +16,16 @@ export default function PublicFooter({ lang }) {
         ["/how-it-works", t("কীভাবে কাজ করে", "How it works")],
         ["/profit-rates", t("মুনাফার হার", "Profit rates")],
         ["/register", t("ফ্রি অ্যাকাউন্ট", "Create account")],
-        ["/login", t("লগইন", "Log in")],
       ],
     },
     {
       title: t("শিখুন", "Learn"),
       links: [
         ["/gpf-guide", t("GPF নির্দেশিকা", "GPF guide")],
-        ["/glossary", t("GPF পরিভাষা", "GPF glossary")],
+        ["/articles", t("লেখা", "Articles")],
+        ["/glossary", t("পরিভাষা", "Glossary")],
         ["/faq", t("প্রশ্নোত্তর", "FAQ")],
-        ["/articles", t("সব লেখা", "All articles")],
       ],
-    },
-    {
-      title: t("জনপ্রিয় লেখা", "Popular reads"),
-      links: ARTICLES.slice(0, 4).map((a) => [`/articles/${a.slug}`, a[lang].short || a[lang].title]),
     },
     {
       title: t("প্রতিষ্ঠান", "Company"),
@@ -39,19 +33,24 @@ export default function PublicFooter({ lang }) {
         ["/about", t("আমাদের সম্পর্কে", "About")],
         ["/contact", t("যোগাযোগ", "Contact")],
         ["/privacy", t("গোপনীয়তা নীতি", "Privacy policy")],
-        ["/terms", t("ব্যবহারের শর্তাবলি", "Terms of use")],
+        ["/terms", t("শর্তাবলি", "Terms of use")],
       ],
     },
   ];
 
+  const socials = [
+    { icon: "bi-envelope", label: t("ইমেইল", "Email"), href: `mailto:${c.email}` },
+    { icon: "bi-telephone", label: t("ফোন", "Phone"), href: `tel:${c.phoneIntl}` },
+    { icon: "bi-whatsapp", label: "WhatsApp", href: `https://wa.me/${c.whatsapp}`, external: true },
+  ];
+
   return (
     <footer className="public-footer">
-      {/* ---- links ---- */}
       <div className="footer-main">
         <div className="container">
-          <div className="row g-4">
+          <div className="row g-5">
             <div className="col-lg-4">
-              <Link href={href("/")} className="d-inline-flex align-items-center gap-2 mb-3 fs-5 fw-semibold text-white">
+              <Link href={href("/")} className="footer-brand">
                 <span className="brand-mark">
                   <i className="bi bi-calculator-fill" />
                 </span>
@@ -59,83 +58,72 @@ export default function PublicFooter({ lang }) {
               </Link>
               <p className="footer-brand-text">
                 {t(
-                  "সাধারণ ভবিষ্য তহবিলের (GPF) স্ল্যাব-ভিত্তিক মুনাফা, মাসভিত্তিক চাঁদার মুনাফা ও বছর শেষের সমাপনী জমা নিজেই হিসাব করার বিনামূল্যের টুল।",
-                  "A free tool to work out your General Provident Fund (GPF) slab profit, month-wise subscription profit and year-end closing balance yourself."
+                  "সাধারণ ভবিষ্য তহবিলের (GPF) মুনাফা ও বছর শেষের সমাপনী জমা নিজেই হিসাব করার বিনামূল্যের টুল।",
+                  "A free tool to work out your General Provident Fund (GPF) profit and year-end closing balance."
                 )}
               </p>
-              <div className="footer-card">
-                <div className="footer-card-head">
-                  <span className="footer-avatar" aria-hidden="true">KB</span>
-                  <div>
-                    <div className="footer-card-name">{c.name[lang]}</div>
-                    <div className="footer-card-role">{t("নির্মাতা ও সাপোর্ট", "Creator & support")}</div>
-                  </div>
-                </div>
-                <div className="footer-card-rows">
-                  {[
-                    { icon: "bi-envelope-fill", label: t("ইমেইল", "Email"), value: c.email, href: `mailto:${c.email}` },
-                    { icon: "bi-telephone-fill", label: t("ফোন", "Phone"), value: c.phone, href: `tel:${c.phoneIntl}` },
-                    {
-                      icon: "bi-whatsapp",
-                      label: "WhatsApp",
-                      value: t("মেসেজ দিন", "Send a message"),
-                      href: `https://wa.me/${c.whatsapp}`,
-                      external: true,
-                    },
-                  ].map((row) => (
-                    <a
-                      key={row.label}
-                      href={row.href}
-                      className="footer-card-row"
-                      {...(row.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    >
-                      <span className="footer-card-icon">
-                        <i className={`bi ${row.icon}`} />
-                      </span>
-                      <span className="d-flex flex-column lh-sm overflow-hidden">
-                        <small>{row.label}</small>
-                        <span className="text-truncate">{row.value}</span>
-                      </span>
-                      <i className="bi bi-arrow-up-right ms-auto footer-card-go" />
-                    </a>
-                  ))}
-                </div>
+              <div className="footer-social">
+                {socials.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    aria-label={s.label}
+                    title={s.label}
+                    {...(s.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    <i className={`bi ${s.icon}`} />
+                  </a>
+                ))}
               </div>
             </div>
 
-            {columns.map((col) => (
-              <div className="col-6 col-md-3 col-lg-2" key={col.title}>
-                <h2 className="footer-heading">{col.title}</h2>
-                <ul className="footer-links">
-                  {col.links.map(([p, label]) => (
-                    <li key={p}>
-                      <Link href={href(p)}>{label}</Link>
+            <div className="col-lg-8">
+              <div className="row g-4">
+                {columns.map((col) => (
+                  <div className="col-6 col-md-3" key={col.title}>
+                    <h2 className="footer-heading">{col.title}</h2>
+                    <ul className="footer-links">
+                      {col.links.map(([p, label]) => (
+                        <li key={p}>
+                          <Link href={href(p)}>{label}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                <div className="col-6 col-md-3">
+                  <h2 className="footer-heading">{t("যোগাযোগ", "Contact")}</h2>
+                  <ul className="footer-links">
+                    <li className="text-white-50">{c.name[lang]}</li>
+                    <li>
+                      <a href={`mailto:${c.email}`}>{c.email}</a>
                     </li>
-                  ))}
-                </ul>
+                    <li>
+                      <a href={`tel:${c.phoneIntl}`}>{c.phone}</a>
+                    </li>
+                    <li>
+                      <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener noreferrer">
+                        WhatsApp
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            ))}
-          </div>
-
-          <div className="footer-badges">
-            <span><i className="bi bi-shield-check me-1" />{t("এনক্রিপ্টেড পাসওয়ার্ড", "Encrypted passwords")}</span>
-            <span><i className="bi bi-eye-slash me-1" />{t("কোনো বিজ্ঞাপন বা ট্র্যাকিং নেই", "No ads or tracking")}</span>
-            <span><i className="bi bi-bullseye me-1" />{t("পয়সা পর্যন্ত নির্ভুল", "Accurate to the paisa")}</span>
-            <span><i className="bi bi-translate me-1" />{t("বাংলা ও ইংরেজি", "Bangla & English")}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ---- bottom bar ---- */}
       <div className="footer-bottom">
-        <div className="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div className="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
           <span>
-            © {new Date().getFullYear()} {SITE.name[lang]}. {t("সর্বস্বত্ব সংরক্ষিত।", "All rights reserved.")}{" "}
-            <span className="d-none d-md-inline">
-              {t("এটি একটি ব্যক্তিগত উদ্যোগ, সরকারি ওয়েবসাইট নয়।", "An independent project, not a government website.")}
-            </span>
+            © {new Date().getFullYear()} {SITE.name[lang]}. {t("সর্বস্বত্ব সংরক্ষিত।", "All rights reserved.")}
           </span>
-          <FooterLangLinks />
+          <div className="d-flex flex-wrap align-items-center gap-3">
+            <Link href={href("/privacy")}>{t("গোপনীয়তা", "Privacy")}</Link>
+            <Link href={href("/terms")}>{t("শর্তাবলি", "Terms")}</Link>
+            <FooterLangLinks />
+          </div>
         </div>
       </div>
     </footer>
