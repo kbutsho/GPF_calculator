@@ -20,6 +20,29 @@ JWT_SECRET=<লম্বা র‍্যান্ডম স্ট্রিং>
 NEXT_PUBLIC_SITE_URL=https://your-domain.com   # ঐচ্ছিক, sitemap/canonical-এর জন্য
 ```
 
+সার্চ ইঞ্জিন যাচাইয়ের জন্য (ঐচ্ছিক): `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_BING_SITE_VERIFICATION`।
+
+অ্যাডমিন অ্যাকাউন্ট তৈরি (বা কোনো ইমেইলের অ্যাকাউন্টকে অ্যাডমিন বানানো):
+
+```bash
+ADMIN_NAME="Admin" ADMIN_EMAIL="..." ADMIN_PASSWORD="..." \
+  node --env-file=.env.local scripts/create-admin.mjs
+```
+
+## ভাষা ও SEO
+
+- ডিফল্ট ভাষা বাংলা — পাবলিক পেজ `/features`, ইংরেজি সংস্করণ `/en/features`। `proxy.js`
+  `/en/*` কে একই পেজে রিরাইট করে; প্রতিটি পেজে canonical + hreflang (bn/en/x-default)।
+- ড্যাশবোর্ড/অ্যাডমিনে URL বদলায় না, `gpf_lang` কুকি অনুযায়ী ভাষা।
+- লেখার ধরন: সার্ভারে `tr(lang)`, ক্লায়েন্টে `useLang().t` — `t("বাংলা", "English")`।
+- JSON-LD: Organization, WebSite, WebApplication, FAQPage, HowTo, Article, BreadcrumbList।
+- `sitemap.xml` (দুই ভাষা + hreflang), `robots.txt`, OG ইমেজ, আইকন, ওয়েব ম্যানিফেস্ট।
+
+## অ্যাডমিন (`/admin`)
+
+সব ব্যবহারকারীর তালিকা (খোঁজা, অবস্থা ফিল্টার), প্রতিজনের তথ্য ও সংরক্ষিত প্রতিটি বছরের
+হিসাব (শুধু দেখা), অ্যাকাউন্ট সক্রিয়/নিষ্ক্রিয় আর পাসওয়ার্ড রিসেট।
+
 পুরোনো (একক-ব্যবহারকারী) ডেটা কোনো অ্যাকাউন্টে তুলে দিতে:
 
 ```bash
